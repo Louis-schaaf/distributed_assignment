@@ -9,33 +9,36 @@
 #include "stb_image_write.h"
 
 __global__ void gaussianKernel(float* img, float* out, int width, int height) {
-    const float kernel[3][3] = {
-        {1/16.f, 2/16.f, 1/16.f},
-        {2/16.f, 4/16.f, 2/16.f},
-        {1/16.f, 2/16.f, 1/16.f}
-    };
+    const int R = 10;                   // kernel radius  => 21×21
+    const float sigma = 10.f;           // sterkte van blur
+    const float sigma2 = 2 * sigma * sigma;
 
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
     if (x >= width || y >= height) return;
 
-    float sum[3] = {0, 0, 0};
-    for (int ky = -1; ky <= 1; ky++) {
-        for (int kx = -1; kx <= 1; kx++) {
+    float sum[3] = {0,0,0};
+    float total = 0.f;
+
+    for (int ky = -R; ky <= R; ++ky) {
+        for (int kx = -R; kx <= R; ++kx) {+
+            float w = expf(-(kx*kx + ky*ky) / sigma2);
+
             int ix = min(max(x + kx, 0), width - 1);
             int iy = min(max(y + ky, 0), height - 1);
             int idx = (iy * width + ix) * 3;
-            float k = kernel[ky + 1][kx + 1];
-            sum[0] += k * img[idx];
-            sum[1] += k * img[idx + 1];
-            sum[2] += k * img[idx + 2];
+
+            sum[0] += w * img[idx];
+            sum[1] += w * img[idx + 1];
+            sum[2] += w * img[idx + 2];
+            total  += w;
         }
     }
 
     int outIdx = (y * width + x) * 3;
-    out[outIdx] = sum[0];
-    out[outIdx + 1] = sum[1];
-    out[outIdx + 2] = sum[2];
+    out[outIdx]     = sum[0] / total;
+    out[outIdx + 1] = sum[1] / total;
+    out[outIdx + 2] = sum[2] / total;
 }
 
 int main(int argc, char** argv) {
