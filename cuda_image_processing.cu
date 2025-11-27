@@ -87,6 +87,9 @@ int main(int argc, char** argv) {
     cudaFree(out);
     free(out_uc);
 
+    float ms = 0;
+    cudaEventElapsedTime(&ms, start, stop);
+    printf("Kernel time: %f ms\n", ms);
     printf("Output saved to %s\n", argv[2]);
     return 0;
 }
