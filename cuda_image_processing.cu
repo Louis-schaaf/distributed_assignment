@@ -47,6 +47,10 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+
     int width, height, channels;
     unsigned char* img_uc = stbi_load(argv[1], &width, &height, &channels, 3);
     if (!img_uc) return 1;
