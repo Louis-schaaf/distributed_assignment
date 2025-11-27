@@ -21,7 +21,7 @@ __global__ void gaussianKernel(float* img, float* out, int width, int height) {
     float total = 0.f;
 
     for (int ky = -R; ky <= R; ++ky) {
-        for (int kx = -R; kx <= R; ++kx) {+
+        for (int kx = -R; kx <= R; ++kx) {
             float w = expf(-(kx*kx + ky*ky) / sigma2);
 
             int ix = min(max(x + kx, 0), width - 1);
