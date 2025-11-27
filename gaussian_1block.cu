@@ -9,34 +9,26 @@
 #include "stb_image_write.h"
 
 __global__ void gaussianKernel(float* img, float* out, int width, int height) {
-    // Radius of the Gaussian kernel
     const int R = 10;
-    // Standard deviation for Gaussian function
     const float sigma = 10.f;
     const float sigma2 = 2 * sigma * sigma;
 
-    // Compute unique thread ID within the block
     int tid = threadIdx.y * blockDim.x + threadIdx.x;
-    // Total number of threads available in this block
     int total_threads = blockDim.x * blockDim.y;
 
     int num_pixels = width * height;
 
-    // Stride loop: each thread processes multiple pixels
     for (int p = tid; p < num_pixels; p += total_threads) {
-        // Convert linear index p to 2D pixel coordinates
         int x = p % width;
         int y = p / width;
 
         float sum[3] = {0,0,0};
         float total = 0.f;
 
-        // Apply Gaussian blur by sampling neighbors
         for (int ky = -R; ky <= R; ++ky) {
             for (int kx = -R; kx <= R; ++kx) {
                 float w = expf(-(kx*kx + ky*ky) / sigma2);
 
-                // Clamp sampling coordinates to image boundaries
                 int ix = min(max(x + kx, 0), width - 1);
                 int iy = min(max(y + ky, 0), height - 1);
                 int idx = (iy * width + ix) * 3;
@@ -48,7 +40,6 @@ __global__ void gaussianKernel(float* img, float* out, int width, int height) {
             }
         }
 
-        // Write blurred pixel to output buffer
         int outIdx = p * 3;
         out[outIdx]     = sum[0] / total;
         out[outIdx + 1] = sum[1] / total;
@@ -62,8 +53,11 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+
     int width, height, channels;
-    // Load input image
     unsigned char* img_uc = stbi_load(argv[1], &width, &height, &channels, 3);
     if (!img_uc) return 1;
 
@@ -71,11 +65,9 @@ int main(int argc, char** argv) {
     size_t size = num_pixels * 3 * sizeof(float);
 
     float *img, *out;
-    // Allocate unified memory for GPU
     cudaMallocManaged(&img, size);
     cudaMallocManaged(&out, size);
 
-    // Copy image to managed float buffer
     for (size_t i = 0; i < num_pixels * 3; i++)
         img[i] = (float)img_uc[i];
 
@@ -85,9 +77,13 @@ int main(int argc, char** argv) {
     dim3 block(32, 32);
     // 1 block
     dim3 grid(1,1);
-    // Launch kernel
+
+    // Timing
+    cudaEventRecord(start);
     gaussianKernel<<<grid, block>>>(img, out, width, height);
-    cudaDeviceSynchronize();
+    cudaEventRecord(stop);
+    cudaEventSynchronize(stop);
+    cudaDeviceSynchronize(); // Overbodig?
 
     unsigned char* out_uc = (unsigned char*)malloc(num_pixels * 3);
     // Convert float output back to unsigned char
@@ -102,6 +98,9 @@ int main(int argc, char** argv) {
     cudaFree(out);
     free(out_uc);
 
+    float ms = 0;
+    cudaEventElapsedTime(&ms, start, stop);
+    printf("Kernel time: %f ms\n", ms);
     printf("Output saved to %s\n", argv[2]);
     return 0;
 }

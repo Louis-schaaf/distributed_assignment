@@ -65,8 +65,13 @@ int main(int argc, char** argv) {
 
     dim3 block(16, 16);
     dim3 grid((width + 15)/16, (height + 15)/16);
+
+    // Timing
+    cudaEventRecord(start);
     gaussianKernel<<<grid, block>>>(img, out, width, height);
-    cudaDeviceSynchronize();
+    cudaEventRecord(stop);
+    cudaEventSynchronize(stop);
+    cudaDeviceSynchronize(); // Overbodig?
 
     unsigned char* out_uc = (unsigned char*)malloc(num_pixels * 3);
     for (size_t i = 0; i < num_pixels * 3; i++)
