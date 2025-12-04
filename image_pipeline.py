@@ -81,7 +81,12 @@ def pipeline_canny(input_img, output_img, args):
     run_cuda("kernel.txt", "blur.png", "grad_y.png", args.blocks)
 
     gx = imageio.imread("grad_x.png").astype(float)
+    if gx.ndim == 3:
+        gx = gx[:, :, 0]
+
     gy = imageio.imread("grad_y.png").astype(float)
+    if gy.ndim == 3:
+        gy = gy[:, :, 0]
 
     # Gradient magnitude and angle
     mag = np.sqrt(gx*gx + gy*gy)
