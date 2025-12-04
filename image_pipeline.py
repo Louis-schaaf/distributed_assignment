@@ -97,16 +97,16 @@ def pipeline_canny(input_img, output_img, args):
 
     for y in range(1, h-1):
         for x in range(1, w-1):
-            a = angle[y, x]
+            a = angle[y, x]  # scalar
 
             if (0 <= a < 22.5) or (157.5 <= a <= 180):
-                n1, n2 = mag[y, x-1], mag[y, x+1]
+                n1, n2 = mag[y, x-1], mag[y, x+1]     # horizontal
             elif 22.5 <= a < 67.5:
-                n1, n2 = mag[y-1, x+1], mag[y+1, x-1]
+                n1, n2 = mag[y-1, x+1], mag[y+1, x-1] # diag 1
             elif 67.5 <= a < 112.5:
-                n1, n2 = mag[y-1, x], mag[y+1, x]
+                n1, n2 = mag[y-1, x], mag[y+1, x]     # vertical
             else:
-                n1, n2 = mag[y-1, x-1], mag[y+1, x+1]
+                n1, n2 = mag[y-1, x-1], mag[y+1, x+1] # diag 2
 
             if mag[y, x] >= n1 and mag[y, x] >= n2:
                 nms[y, x] = mag[y, x]
