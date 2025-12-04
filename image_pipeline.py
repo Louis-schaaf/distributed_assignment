@@ -41,7 +41,7 @@ def sobel_y():
         [1,  2,  1]
     ], dtype=float)
 
-def pipeline_gaussian(input_img, output_img, args, sigma=1.0):
+def pipeline_gaussian(input_img, output_img, args, sigma):
     if args.kernel is not None:
         run_cuda(args.kernel, input_img, output_img, args.blocks)
         return
@@ -146,6 +146,7 @@ if __name__ == "__main__":
     parser.add_argument("output")
     parser.add_argument("--blocks", type=int, default=1024, help="Number of CUDA blocks")
     parser.add_argument("--kernel", type=str, default=None, help="Optional path to custom kernel .txt file")
+    parser.add_argument("--sigma", type=float, default=1.0, help="Sigma value for Gaussian blur")
     args = parser.parse_args()
 
     custom_kernel = args.kernel
@@ -155,7 +156,7 @@ if __name__ == "__main__":
         exit(0)
 
     if args.filter == "gaussian":
-        pipeline_gaussian(args.input, args.output, args)
+        pipeline_gaussian(args.input, args.output, args, sigma=args.sigma)
     elif args.filter == "sobel":
         pipeline_sobel(args.input, args.output, args)
     elif args.filter == "canny":
