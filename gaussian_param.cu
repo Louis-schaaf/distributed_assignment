@@ -2,6 +2,7 @@
 #include <cuda_runtime.h>
 #include <math.h>
 #include <stdlib.h>
+#include <vector>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -9,11 +10,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
-__global__ void gaussianKernel(float* img, float* out, int width, int height) {
-    const int R = 10;
-    const float sigma = 10.f;
-    const float sigma2 = 2 * sigma * sigma;
-
+__global__ void gaussianKernel(float* img, float* out, int width, int height, float* kernel, int kernel_size, int R) {
     int local_tid = threadIdx.y * blockDim.x + threadIdx.x;
     int tid = blockIdx.x * (blockDim.x * blockDim.y) + local_tid;
     int total_threads = gridDim.x * blockDim.x * blockDim.y;
@@ -29,7 +26,7 @@ __global__ void gaussianKernel(float* img, float* out, int width, int height) {
 
         for (int ky = -R; ky <= R; ++ky) {
             for (int kx = -R; kx <= R; ++kx) {
-                float w = expf(-(kx*kx + ky*ky) / sigma2);
+                float w = kernel[(ky + R) * kernel_size + (kx + R)];
 
                 int ix = min(max(x + kx, 0), width - 1);
                 int iy = min(max(y + ky, 0), height - 1);
@@ -50,9 +47,9 @@ __global__ void gaussianKernel(float* img, float* out, int width, int height) {
 }
 
 int main(int argc, char** argv) {
-    if (argc < 4) {
-        printf("Usage: %s <input_image> <output_image> <num_blocks>\n", argv[0]);
-        printf("Example: %s input.png output.png 4\n", argv[0]);
+    if (argc < 5) {
+        printf("Usage: %s <input_image> <output_image> <num_blocks> <kernel.txt>\n", argv[0]);
+        printf("Example: %s input.png output.png 4 kernel.txt\n", argv[0]);
         return 1;
     }
 
@@ -62,6 +59,28 @@ int main(int argc, char** argv) {
         printf("Error: Number of blocks must be positive\n");
         return 1;
     }
+
+    // Load convolution kernel from a text file provided by argv[4]
+    FILE* fk = fopen(argv[4], "r");
+    if (!fk) {
+        printf("Error: could not open kernel file %s\n", argv[4]);
+        return 1;
+    }
+
+    int kernel_size;
+    fscanf(fk, "%d", &kernel_size);
+
+    std::vector<float> h_kernel(kernel_size * kernel_size);
+    for (int i = 0; i < kernel_size * kernel_size; i++)
+        fscanf(fk, "%f", &h_kernel[i]);
+    fclose(fk);
+
+    int R = kernel_size / 2;
+
+    float* d_kernel;
+    cudaMallocManaged(&d_kernel, kernel_size * kernel_size * sizeof(float));
+    for (int i = 0; i < kernel_size * kernel_size; i++)
+        d_kernel[i] = h_kernel[i];
 
     cudaEvent_t start, stop;
     cudaEventCreate(&start);
@@ -90,7 +109,7 @@ int main(int argc, char** argv) {
 
     // Timing
     cudaEventRecord(start);
-    gaussianKernel<<<grid, block>>>(img, out, width, height);
+    gaussianKernel<<<grid, block>>>(img, out, width, height, d_kernel, kernel_size, R);
     cudaEventRecord(stop);
     cudaEventSynchronize(stop);
 
@@ -106,6 +125,7 @@ int main(int argc, char** argv) {
     cudaFree(img);
     cudaFree(out);
     free(out_uc);
+    cudaFree(d_kernel);
 
     float ms = 0;
     cudaEventElapsedTime(&ms, start, stop);
