@@ -1,6 +1,7 @@
 import numpy as np
 import subprocess
 import argparse
+import imageio
 import os
 
 def save_kernel_txt(kernel, path):
@@ -78,9 +79,6 @@ def pipeline_canny(input_img, output_img, args):
     Ky = sobel_y()
     save_kernel_txt(Ky, "kernel.txt")
     run_cuda("kernel.txt", "blur.png", "grad_y.png", args.blocks)
-
-    import imageio
-    import numpy as np
 
     gx = imageio.imread("grad_x.png").astype(float)
     gy = imageio.imread("grad_y.png").astype(float)
