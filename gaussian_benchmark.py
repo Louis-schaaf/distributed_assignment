@@ -3,7 +3,7 @@ import datetime
 
 blocks_list = [1, 2, 4, 8, 16, 32, 64, 128]
 
-input_img = "4k.jpg"
+input_img = "img/in/4k.jpg"
 
 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 logfile = f"logs/cuda_gaussian_bench_{timestamp}.txt"
