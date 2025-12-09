@@ -3,10 +3,10 @@
 #include <math.h>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "stb/stb_image.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
+#include "stb/stb_image_write.h"
 
 __global__ void gaussianKernel(float* img, float* out, int width, int height) {
     const int R = 10;                   // kernel radius  => 21×21

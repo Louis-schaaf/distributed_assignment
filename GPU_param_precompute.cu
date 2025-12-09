@@ -5,10 +5,10 @@
 #include <vector>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "stb/stb_image.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
+#include "stb/stb_image_write.h"
 
 __global__ void gaussianKernel(float* img, float* out, int width, int height, float* kernel, int kernel_size, int R) {
     int local_tid = threadIdx.y * blockDim.x + threadIdx.x;
@@ -105,8 +105,6 @@ int main(int argc, char** argv) {
     dim3 block(32, 32);
     dim3 grid(num_blocks, 1);
 
-    printf("Running with %d blocks, %d threads per block\n", num_blocks, block.x * block.y);
-
     // Timing
     cudaEventRecord(start);
     gaussianKernel<<<grid, block>>>(img, out, width, height, d_kernel, kernel_size, R);
@@ -129,6 +127,7 @@ int main(int argc, char** argv) {
 
     float ms = 0;
     cudaEventElapsedTime(&ms, start, stop);
+    printf("precomputed,%s,%d,%f\n", argv[2], num_blocks, ms);
     printf("Kernel time: %f ms\n", ms);
     printf("Blocks: %d, Threads per block: %d\n", num_blocks, block.x * block.y);
     printf("Output saved to %s\n", argv[2]);

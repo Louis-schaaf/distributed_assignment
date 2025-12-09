@@ -15,7 +15,7 @@ def run_cuda(kernel_path, input_path, output_path, blocks, mode):
     if mode == "unop":
         # unoptimized version: no kernel file
         subprocess.run([
-            "./gaussian_param_unop",
+            "compiled/gaussian_param_unop",
             input_path,
             output_path,
             str(blocks)
@@ -23,7 +23,7 @@ def run_cuda(kernel_path, input_path, output_path, blocks, mode):
     else:
         # precomputed version
         subprocess.run([
-            "./gaussian_param_precomp",
+            "compiled/gaussian_param_precomp",
             input_path,
             output_path,
             str(blocks),
@@ -60,45 +60,44 @@ def pipeline_gaussian(input_img, output_img, args):
         run_cuda(args.kernel, input_img, output_img, args.blocks, args.mode)
         return
     K = gaussian_kernel(21, args.sigma)
-    save_kernel_txt(K, "kernel.txt")
-    run_cuda("kernel.txt", input_img, output_img, args.blocks, args.mode)
+    save_kernel_txt(K, "kernels/kernel.txt")
+    run_cuda("kernels/kernel.txt", input_img, output_img, args.blocks, args.mode)
 
 def pipeline_sobel(input_img, output_img, args):
     if args.kernel is not None:
         run_cuda(args.kernel, input_img, output_img, args.blocks, args.mode)
         return
     Kx = sobel_x()
-    save_kernel_txt(Kx, "kernel.txt")
-    run_cuda("kernel.txt", input_img, "sobel_x.png", args.blocks, args.mode)
+    save_kernel_txt(Kx, "kernels/kernel.txt")
+    run_cuda("kernels/kernel.txt", input_img, "img/temp/sobel_x.png", args.blocks, args.mode)
 
     Ky = sobel_y()
-    save_kernel_txt(Ky, "kernel.txt")
-    run_cuda("kernel.txt", input_img, "sobel_y.png", args.blocks, args.mode)
-
+    save_kernel_txt(Ky, "kernels/kernel.txt")
+    run_cuda("kernels/kernel.txt", input_img, "img/temp/sobel_y.png", args.blocks, args.mode)
 def pipeline_canny(input_img, output_img, args):
     if args.kernel is not None:
         run_cuda(args.kernel, input_img, output_img, args.blocks, args.mode)
         return
     # Gaussian blur
     K = gaussian_kernel(5, 1.4)
-    save_kernel_txt(K, "kernel.txt")
-    run_cuda("kernel.txt", input_img, "blur.png", args.blocks, args.mode)
+    save_kernel_txt(K, "kernels/kernel.txt")
+    run_cuda("kernels/kernel.txt", input_img, "img/temp/imgblur.png", args.blocks, args.mode)
 
     # Sobel X
     Kx = sobel_x()
-    save_kernel_txt(Kx, "kernel.txt")
-    run_cuda("kernel.txt", "blur.png", "grad_x.png", args.blocks, args.mode)
+    save_kernel_txt(Kx, "kernels/kernel.txt")
+    run_cuda("kernels/kernel.txt", "img/temp/imgblur.png", "img/temp/grad_x.png", args.blocks, args.mode)
 
     # Sobel Y
     Ky = sobel_y()
-    save_kernel_txt(Ky, "kernel.txt")
-    run_cuda("kernel.txt", "blur.png", "grad_y.png", args.blocks, args.mode)
+    save_kernel_txt(Ky, "kernels/kernel.txt")
+    run_cuda("kernels/kernel.txt", "img/temp/imgblur.png", "img/temp/grad_y.png", args.blocks, args.mode)
 
-    gx = imageio.imread("grad_x.png").astype(float)
+    gx = imageio.imread("img/temp/grad_x.png").astype(float)
     if gx.ndim == 3:
         gx = gx[:, :, 0]
 
-    gy = imageio.imread("grad_y.png").astype(float)
+    gy = imageio.imread("img/temp/grad_y.png").astype(float)
     if gy.ndim == 3:
         gy = gy[:, :, 0]
 
@@ -171,7 +170,7 @@ if __name__ == "__main__":
         exit(0)
 
     if args.filter == "gaussian":
-        pipeline_gaussian(args.input, args.output, args, sigma=args.sigma)
+        pipeline_gaussian(args.input, args.output, args)
     elif args.filter == "sobel":
         pipeline_sobel(args.input, args.output, args)
     elif args.filter == "canny":
