@@ -1,6 +1,6 @@
 #!/bin/bash -l
 #SBATCH --cluster=wice
-#SBATCH --partition=a100
+#SBATCH --partition=gpu_a100
 #SBATCH --nodes=1
 #SBATCH --gpus-per-node=1
 #SBATCH --ntasks-per-node=1
