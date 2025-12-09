@@ -22,10 +22,11 @@ with open(logfile, "w") as f:
         ]
         proc = subprocess.Popen(cmd_unop, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
         output = proc.communicate()[0]
+        f.write(output)
 
         # extract first line for logs
-        first_line = output.splitlines()[0] if output else ""
-        f.write(first_line + "\n")
+        # first_line = output.splitlines()[0] if output else ""
+        # f.write(first_line + "\n")
 
         # pre computed kernel
         cmd_pre = [
@@ -38,10 +39,11 @@ with open(logfile, "w") as f:
         ]
         proc = subprocess.Popen(cmd_pre, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
         output = proc.communicate()[0]
+        f.write(output)
 
         # extract first line for logs
-        first_line = output.splitlines()[0] if output else ""
-        f.write(first_line + "\n")
+        # first_line = output.splitlines()[0] if output else ""
+        # f.write(first_line + "\n")
 
 print("\nKlaar! Alle resultaten zijn opgeslagen in:")
 print(logfile)
