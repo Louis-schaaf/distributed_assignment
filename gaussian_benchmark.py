@@ -20,7 +20,7 @@ with open(logfile, "w") as f:
             input_img,
             f"img_out/out_unop_{b}.png"
         ]
-        proc = subprocess.Popen(cmd_unop, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        proc = subprocess.Popen(cmd_unop, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
         output = proc.communicate()[0]
 
         # extract first line for logs
@@ -36,7 +36,7 @@ with open(logfile, "w") as f:
             input_img,
             f"img_out/out_pre_{b}.png"
         ]
-        proc = subprocess.Popen(cmd_pre, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        proc = subprocess.Popen(cmd_pre, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
         output = proc.communicate()[0]
 
         # extract first line for logs
