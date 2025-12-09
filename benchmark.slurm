@@ -1,17 +1,18 @@
 #!/bin/bash -l
-#SBATCH --job-name=gauss_bench
+#SBATCH --cluster=wice
 #SBATCH --partition=a100
 #SBATCH --nodes=1
 #SBATCH --gpus-per-node=1
 #SBATCH --ntasks-per-node=1
+#SBATCH --account=lp_h_pds_iiw
 #SBATCH --time=00:10:00
 #SBATCH --output=%x.o%A
 #SBATCH --error=%x.e%A
-#SBATCH --account=lp_h_pds_iiw
+
+source /data/leuven/303/vsc30380/slurmhooks
 
 module purge
 module load CUDA/11.7.0
-module load Python/3.10.5-GCCcore-11.3.0
 module load GCC/10.3.0
 
 echo "Compiling CUDA kernels..."
