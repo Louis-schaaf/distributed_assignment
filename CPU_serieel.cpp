@@ -1,9 +1,13 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
-#include "stb_image.h"
-#include "stb_image_write.h"
 #include <chrono>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
 
 int main(int argc, char** argv) {
     if (argc < 3) {
