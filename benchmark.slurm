@@ -44,6 +44,6 @@ nvcc -O3 -DNDEBUG \
 # Run the Python benchmark
 # ======================
 echo "Running Gaussian benchmark..."
+source ~/pdsenv/bin/activate
 python3 gaussian_benchmark.py
-
 echo "Job completed."
