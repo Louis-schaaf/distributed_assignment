@@ -9,7 +9,6 @@
 #SBATCH --output=%x.o%A
 #SBATCH --error=%x.e%A
 
-# Load hooks (mandatory for WICE)
 source /data/leuven/303/vsc30380/slurmhooks
 
 module purge
@@ -22,16 +21,17 @@ echo "============================="
 
 mkdir -p compiled
 
-# ======================
-# Compile CPU serial version
-# ======================
-g++ -O3 -o compiled/gaussian_cpu_serial CPU_serial.cpp -lm
+g++ -O3 -o compiled/cpu_serial CPU_serial.cpp -lm
 
-# ======================
-# Compile optimal GPU version
-# ======================
 nvcc -O3 -DNDEBUG \
-    -o compiled/gaussian_gpu_optimal GPU_optimal.cu \
+    -o compiled/gpu_optimal GPU_optimal.cu \
+    -gencode arch=compute_80,code=sm_80 \
+    -gencode arch=compute_80,code=compute_80 \
+    -diag-suppress 550 \
+    -I.
+
+nvcc -O3 -DNDEBUG \
+    -o compiled/gpu_optimal_precompute GPU_optimal_precompute.cu \
     -gencode arch=compute_80,code=sm_80 \
     -gencode arch=compute_80,code=compute_80 \
     -diag-suppress 550 \
@@ -46,11 +46,10 @@ OUT_CPU=img/out/cpu_out.png
 OUT_GPU=img/out/gpu_out.png
 
 echo "--- CPU Serial ---"
-./compiled/gaussian_cpu_serial $INPUT $OUT_CPU
-
+./compiled/cpu_serial $INPUT $OUT_CPU
 echo "--- GPU Optimal ---"
-./compiled/gaussian_gpu_optimal $INPUT $OUT_GPU
+./compiled/gpu_optimal $INPUT $OUT_GPU
+echo "--- GPU Optimal Precompute ---"
+./compiled/gpu_optimal_precompute $INPUT $OUT_GPU
 
-echo "============================="
 echo "DONE"
-echo "============================="
