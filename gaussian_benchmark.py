@@ -18,7 +18,7 @@ with open(logfile, "w") as f:
             "--mode", "unop",
             "--blocks", str(b),
             input_img,
-            f"img_out/out_unop_{b}.png"
+            f"img/out/out_unop_{b}.png"
         ]
         proc = subprocess.Popen(cmd_unop, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
         output = proc.communicate()[0]
@@ -35,7 +35,7 @@ with open(logfile, "w") as f:
             "--mode", "precomp",
             "--blocks", str(b),
             input_img,
-            f"img_out/out_pre_{b}.png"
+            f"img/out/out_pre_{b}.png"
         ]
         proc = subprocess.Popen(cmd_pre, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
         output = proc.communicate()[0]
