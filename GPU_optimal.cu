@@ -69,6 +69,7 @@ int main(int argc, char** argv) {
 
     dim3 block(16, 16);
     dim3 grid((width + 15)/16, (height + 15)/16);
+    gaussianKernel<<<grid, block>>>(img, out, width, height);
 
     // Timing
     cudaEventRecord(start);

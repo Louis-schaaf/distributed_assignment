@@ -1,7 +1,7 @@
 import numpy as np
 import subprocess
 import argparse
-# import imageio
+import imageio
 import os
 
 def save_kernel_txt(kernel, path):
@@ -149,7 +149,7 @@ def pipeline_canny(input_img, output_img, args):
                 else:
                     result[y, x] = 0
 
-    # imageio.imwrite(output_img, result)
+    imageio.imwrite(output_img, result)
     return
 
 if __name__ == "__main__":

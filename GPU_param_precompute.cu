@@ -60,7 +60,6 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    // Load convolution kernel from a text file provided by argv[4]
     FILE* fk = fopen(argv[4], "r");
     if (!fk) {
         printf("Error: could not open kernel file %s\n", argv[4]);

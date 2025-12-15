@@ -17,12 +17,9 @@ module load GCC/10.3.0
 
 echo "Compiling CUDA kernels..."
 
-# Create output directory
 mkdir -p compiled
 
-# ======================
-# Compile unoptimized version
-# ======================
+
 nvcc -O3 -DNDEBUG \
     -o compiled/gaussian_param_unop GPU_param_unoptimized.cu \
     -gencode arch=compute_80,code=sm_80 \
@@ -30,9 +27,7 @@ nvcc -O3 -DNDEBUG \
     -diag-suppress 550 \
     -I.
 
-# ======================
-# Compile precomputed version
-# ======================
+
 nvcc -O3 -DNDEBUG \
     -o compiled/gaussian_param_precomp GPU_param_precompute.cu \
     -gencode arch=compute_80,code=sm_80 \
@@ -40,9 +35,7 @@ nvcc -O3 -DNDEBUG \
     -diag-suppress 550 \
     -I.
 
-# ======================
-# Run the Python benchmark
-# ======================
+
 echo "Running Gaussian benchmark..."
 source ~/pdsenv/bin/activate
 python3 gaussian_benchmark.py
